@@ -1,70 +1,217 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { createContext, useContext, useState } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
+import { Dimensions, useColorScheme, View } from "react-native";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import ContactScreen from "../../screens/Contact";
+import ProfileScreen from "@/screens/Profile";
+import FavoritesScreen from "@/screens/Favorites";
+import { colors } from "@/utility/colors";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import UserScreen from "@/screens/User";
+import OptionsScreen from "@/screens/Options";
+import CallScreen from "@/screens/Call";
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+const Stack = createStackNavigator();
+const Tab = createMaterialBottomTabNavigator();
+
+const lightTheme = {
+	background: "white",
+	text: "black",
+	primary: "white",
+};
+
+const darkTheme = {
+	background: "black",
+	text: "white",
+	primary: "coral",
+};
+
+const headerStyle: any = (theme: any) => {
+	const { width } = Dimensions.get("window");
+	return {
+		headerTintColor: theme.text,
+		headerStyle: {
+			backgroundColor: theme.primary,
+			height: width > 600 ? 100 : 50,
+		},
+		headerTitleAlign: "center",
+		headerTitleStyle: {
+			fontWeight: "bold",
+			fontSize: 25,
+			height: 25,
+			alignItems: "center",
+		},
+	};
+};
+
+const ThemeContext = createContext({
+	theme: lightTheme,
+	toggleTheme: () => {},
+});
+
+const getTabBarIcon = (iconName: string) => {
+	return ({ color }: { color: string }) => (
+		<MaterialIcons name={iconName} color={color} size={26} />
+	);
+};
+
+function ContactScreens() {
+	const { theme } = useContext(ThemeContext);
+
+	return (
+		<Stack.Navigator
+			initialRouteName="Contacts"
+			screenOptions={headerStyle(theme)}
+		>
+			<Stack.Screen
+				name="Contacts"
+				component={ContactScreen}
+				options={{ title: "Contacts" }}
+			/>
+			<Stack.Screen
+				name="Profile"
+				component={ProfileScreen}
+				options={({ route }: { route: any }) => {
+					const { contact } = route.params;
+					const name = `${contact.name.title} ${contact.name.first} ${contact.name.last}`;
+					return {
+						title: name,
+						headerTintColor: theme.text,
+						headerStyle: { backgroundColor: theme.primary },
+					};
+				}}
+			/>
+			<Stack.Screen
+				name="Call"
+				component={CallScreen}
+				options={{
+					headerTintColor: theme.text,
+					headerStyle: { backgroundColor: theme.primary },
+					header: () => <View />,
+				}}
+			/>
+		</Stack.Navigator>
+	);
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+function FavoritesScreens() {
+	const { theme } = useContext(ThemeContext);
+
+	return (
+		<Stack.Navigator
+			initialRouteName="Favorites"
+			screenOptions={headerStyle(theme)}
+		>
+			<Stack.Screen
+				name="Favorites"
+				component={FavoritesScreen}
+				options={{ title: "Favorites" }}
+			/>
+			<Stack.Screen
+				name="Profile"
+				component={ProfileScreen}
+				options={({ route }: { route: any }) => {
+					const { contact } = route.params;
+					const name = `${contact.name.title} ${contact.name.first} ${contact.name.last}`;
+					return {
+						title: name,
+						headerTintColor: theme.text,
+						headerStyle: { backgroundColor: theme.primary },
+					};
+				}}
+			/>
+			<Stack.Screen
+				name="Options"
+				component={OptionsScreen}
+				options={{ title: "Options" }}
+			/>
+		</Stack.Navigator>
+	);
+}
+
+function UserScreens() {
+	const { theme } = useContext(ThemeContext);
+
+	return (
+		<Stack.Navigator initialRouteName="User" screenOptions={headerStyle(theme)}>
+			<Stack.Screen
+				name="User"
+				component={UserScreen}
+				options={{
+					headerTitle: "Me",
+					headerTintColor: theme.text,
+					headerStyle: {
+						backgroundColor: theme.primary,
+						height: 40,
+					},
+				}}
+			/>
+			<Stack.Screen
+				name="Options"
+				component={OptionsScreen}
+				options={{
+					title: "Options",
+					headerTintColor: theme.text,
+					headerStyle: {
+						backgroundColor: theme.primary,
+						height: 50,
+					},
+					headerTitleAlign: "center",
+					headerTitleStyle: { fontWeight: "bold", fontSize: 24, height: 50 },
+				}}
+			/>
+		</Stack.Navigator>
+	);
+}
+
+export default function AppNavigator() {
+	const colorScheme = useColorScheme();
+	const [isDarkMode, setIsDarkMode] = useState(colorScheme === "dark");
+	const theme = isDarkMode ? darkTheme : lightTheme;
+
+	const toggleTheme = () => {
+		setIsDarkMode(!isDarkMode);
+	};
+
+	return (
+		<ThemeContext.Provider value={{ theme, toggleTheme }}>
+			<NavigationContainer independent={true}>
+				<Tab.Navigator
+					initialRouteName="ContactsScreens"
+					barStyle={{
+						backgroundColor: theme.primary,
+						height: 65,
+						alignContent: "center",
+					}}
+					labeled={false}
+					activeColor={theme.text}
+					inactiveColor={colors.gray}
+				>
+					<Tab.Screen
+						name="ContactScreens"
+						component={ContactScreens}
+						options={{
+							tabBarIcon: getTabBarIcon("list"),
+						}}
+					/>
+					<Tab.Screen
+						name="FavoritesScreens"
+						component={FavoritesScreens}
+						options={{
+							tabBarIcon: getTabBarIcon("star"),
+						}}
+					/>
+					<Tab.Screen
+						name="UserScreen"
+						component={UserScreens}
+						options={{
+							tabBarIcon: getTabBarIcon("person"),
+						}}
+					/>
+				</Tab.Navigator>
+			</NavigationContainer>
+		</ThemeContext.Provider>
+	);
+}
